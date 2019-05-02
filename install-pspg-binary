@@ -13,7 +13,7 @@ procure_package "$pspgbin_path" "$pspgbin_url"
 whisper 'STEP 2 --------------------------------------------------------------------------------------------'
 build_pspg_binary
 whisper 'STEP 5 --------------------------------------------------------------------------------------------'
-# link_pspg_binary
+link_pspg_binary
 
 
 
