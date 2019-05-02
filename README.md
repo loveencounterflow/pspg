@@ -17,4 +17,3 @@ output), built on [Pavel Stehule's great PostGreSQL pager](https://github.com/ok
 
 (TBD)
 
-
