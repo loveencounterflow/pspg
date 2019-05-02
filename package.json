@@ -1,0 +1,33 @@
+{
+  "name": "pspg",
+  "version": "0.0.1",
+  "description": "pager for tabular content, respects wide characters, built on github.com/okbob/pspg",
+  "main": "lib/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loveencounterflow/pspg.git"
+  },
+  "keywords": [
+    "pager",
+    "paging",
+    "table",
+    "tabular",
+    "output",
+    "cjk",
+    "wide",
+    "characters",
+    "unicode",
+    "database",
+    "terminal",
+    "console"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/loveencounterflow/pspg/issues"
+  },
+  "homepage": "https://github.com/loveencounterflow/pspg#readme"
+}
