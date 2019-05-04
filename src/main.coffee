@@ -60,7 +60,7 @@ path_to_pspg              = abspath '../pspg'
       keys ?= ( key for key of row )
       d     = {}
       for key of row
-        d[ key ]      = value = row[ key ].toString()
+        d[ key ]      = value = row[ key ]?.toString() ? ''
         width         = width_of value
         widths[ key ] = Math.max ( widths[ key ] ? 0 ), width
       collector.push d
@@ -90,6 +90,7 @@ path_to_pspg              = abspath '../pspg'
   #.........................................................................................................
   return PS.$watch { last, }, ( line ) ->
     return source.end() if line is last
+    line  = '' unless line?
     line  = line.toString() unless isa.text line
     line += '\n'            unless isa.line line
     source.send line

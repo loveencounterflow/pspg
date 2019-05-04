@@ -46,6 +46,7 @@ jr                        = JSON.stringify
   pipeline.push @$add_random_words 10
   pipeline.push @$add_ncrs()
   pipeline.push @$add_numbers()
+  pipeline.push @$add_nulls()
   pipeline.push @$reorder_fields()
   pipeline.push PSPG.$tee_as_table()
   pipeline.push PS.$drain()
@@ -95,6 +96,14 @@ jr                        = JSON.stringify
     row.nr          = nr
     row.nr2         = nr ** 2
     row.nr3         = nr ** 3
+    send row
+
+#-----------------------------------------------------------------------------------------------------------
+@$add_nulls = ->
+  return $ ( row, send ) =>
+    switch row.nr
+      when 3 then delete row.glyph
+      when 4 then row.bs = null
     send row
 
 #-----------------------------------------------------------------------------------------------------------
