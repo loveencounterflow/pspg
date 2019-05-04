@@ -38,35 +38,56 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_tabular_output = ->
-  source    = PS.read_from_file path_1
-  pipeline  = []
-  pipeline.push source
-  pipeline.push PS.$split_tsv()
-  pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
-  pipeline.push @$add_random_words 10
-  pipeline.push @$add_ncrs()
-  pipeline.push @$add_numbers()
-  pipeline.push @$add_nulls()
-  pipeline.push @$reorder_fields()
-  pipeline.push PSPG.$tee_as_table()
-  pipeline.push PS.$drain()
-  PS.pull pipeline...
+  return new Promise ( resolve ) =>
+    source    = PS.read_from_file path_1
+    pipeline  = []
+    pipeline.push source
+    pipeline.push PS.$split_tsv()
+    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push @$add_random_words 10
+    pipeline.push @$add_ncrs()
+    pipeline.push @$add_numbers()
+    pipeline.push @$add_nulls()
+    pipeline.push @$reorder_fields()
+    pipeline.push PSPG.$tee_as_table -> resolve()
+    pipeline.push PS.$drain()
+    PS.pull pipeline...
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_tabular_output_with_different_shapes = ->
+  ### This is to demonstrate that when objects with different shapes—i.e. different sets of properties—are
+  tabulated, the columns displayed represent the union of all keys of all objects. ###
+  return new Promise ( resolve ) =>
+    source    = PS.read_from_file path_1
+    pipeline  = []
+    pipeline.push source
+    pipeline.push PS.$split_tsv()
+    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push @$add_random_words 10
+    pipeline.push @$add_ncrs()
+    pipeline.push @$add_numbers()
+    pipeline.push @$reorder_fields()
+    pipeline.push @$drop_keys()
+    pipeline.push PSPG.$tee_as_table -> resolve()
+    pipeline.push PS.$drain()
+    PS.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_paged_output = ->
-  source    = PS.read_from_file path_1
-  pipeline  = []
-  pipeline.push source
-  pipeline.push PS.$split_tsv()
-  pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
-  pipeline.push @$add_random_words 10
-  pipeline.push @$add_ncrs()
-  pipeline.push @$add_numbers()
-  pipeline.push @$reorder_fields()
-  pipeline.push @$as_line()
-  pipeline.push PSPG.$page_output()
-  pipeline.push PS.$drain()
-  PS.pull pipeline...
+  return new Promise ( resolve ) =>
+    source    = PS.read_from_file path_1
+    pipeline  = []
+    pipeline.push source
+    pipeline.push PS.$split_tsv()
+    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push @$add_random_words 10
+    pipeline.push @$add_ncrs()
+    pipeline.push @$add_numbers()
+    pipeline.push @$reorder_fields()
+    pipeline.push @$as_line()
+    pipeline.push PSPG.$page_output -> resolve()
+    pipeline.push PS.$drain()
+    PS.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
 @$reorder_fields = -> $ ( row, send ) =>
@@ -107,6 +128,15 @@ jr                        = JSON.stringify
     send row
 
 #-----------------------------------------------------------------------------------------------------------
+@$drop_keys = ->
+  return $ ( row, send ) =>
+    keys  = ( key for key of row )
+    idx   = row.nr %% keys.length
+    key   = keys[ idx ]
+    send { "#{key}": row[ key ], }
+    # send row
+
+#-----------------------------------------------------------------------------------------------------------
 @text_as_ncrs = ( text ) ->
   R = []
   for chr in Array.from text
@@ -136,7 +166,8 @@ jr                        = JSON.stringify
 ############################################################################################################
 unless module.parent?
   do =>
-    @demo_tabular_output()
-    # @demo_paged_output()
+    await @demo_tabular_output()
+    await @demo_tabular_output_with_different_shapes()
+    await @demo_paged_output()
 
 

@@ -40,7 +40,7 @@ path_to_pspg              = abspath '../pspg'
   yield ' ' + (  ( ( to_width key, widths[ key ] ) for key in keys ).join ' | ' ) + ' '
   yield '-' + (  ( ( to_width '', widths[ key ], { padder: '-', } ) for key in keys ).join '-+-' ) + '-'
   for row in rows
-    yield ' ' + (  ( ( to_width row[ key ], widths[ key ] ) for key in keys ).join ' | ' ) + ' '
+    yield ' ' + (  ( ( to_width ( row[ key ] ? '' ), widths[ key ] ) for key in keys ).join ' | ' ) + ' '
   yield "(#{rows.length} rows)"
   yield '\n\n'
   return null
@@ -48,36 +48,45 @@ path_to_pspg              = abspath '../pspg'
 #-----------------------------------------------------------------------------------------------------------
 @$collect_etc = ->
   last      = Symbol 'last'
-  collector = []
+  rows      = []
   widths    = {}
-  keys      = null
+  keys      = new Set()
   #.........................................................................................................
   return PS.$ { last, }, ( row, send ) =>
     if row is last
-      # console.table collector
-      send line for line from @walk_table_rows collector, keys, widths
+      # console.table rows
+      send line for line from @walk_table_rows rows, [ keys..., ], widths
     else
-      keys ?= ( key for key of row )
-      d     = {}
+      d = {}
       for key of row
+        keys.add key
         d[ key ]      = value = row[ key ]?.toString() ? ''
         width         = width_of value
         widths[ key ] = Math.max 2, ( widths[ key ] ? 2 ), width
-      collector.push d
+      rows.push d
     return null
 
 #-----------------------------------------------------------------------------------------------------------
-@$tee_as_table = ->
+@$tee_as_table = ( settings, handler ) ->
   #.........................................................................................................
   pipeline = []
   pipeline.push @$collect_etc()
-  pipeline.push @$page_output()
+  pipeline.push @$page_output arguments...
   pipeline.push PS.$drain()
   #.........................................................................................................
   return PS.$tee PS.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
-@$page_output = ( settings = null ) ->
+@$page_output = ( settings, handler ) ->
+  switch arity = arguments.length
+    when 1
+      if isa.function settings
+        [ settings, handler, ] = [ null, settings, ]
+    when 2 then null
+    else throw new Error "µ33981 expected 2 or 3 arguments, got #{arity}"
+  validate.function handler   if handler?
+  validate.object   settings  if settings?
+  #.........................................................................................................
   defaults    =
     pager:  path_to_pspg
     args:   [  '-s17', '--force-uniborder', ]
@@ -85,7 +94,7 @@ path_to_pspg              = abspath '../pspg'
   settings    = if settings? then assign {}, defaults, settings else defaults
   source      = PS.new_push_source()
   stream      = pull_stream_to_stream.source PS.pull source
-  stream.pipe new_pager settings, -> urge 'ok'
+  stream.pipe new_pager settings, handler
   last        = Symbol 'last'
   #.........................................................................................................
   return PS.$watch { last, }, ( line ) ->
