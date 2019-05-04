@@ -1,6 +1,6 @@
 {
   "name": "pspg",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "pager for tabular content, respects wide characters, built on github.com/okbob/pspg",
   "main": "lib/main.js",
   "scripts": {
