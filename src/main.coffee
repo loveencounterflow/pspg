@@ -62,7 +62,7 @@ path_to_pspg              = abspath '../pspg'
       for key of row
         d[ key ]      = value = row[ key ]?.toString() ? ''
         width         = width_of value
-        widths[ key ] = Math.max ( widths[ key ] ? 0 ), width
+        widths[ key ] = Math.max 2, ( widths[ key ] ? 2 ), width
       collector.push d
     return null
 
