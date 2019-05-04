@@ -27,7 +27,7 @@ Some of the more pertinent dependencies of this project:
 command line pager some two years ago, it was an immediate success with me. The combination of
 
 * (`more` or `less`-like) paged output tailored to fit PostgreSQL&nbsp;/&nbsp;`psql` (the PostgreSQL
-  interactive terminal),
+  interactive terminal and script-runner),
 * cursor- and mouse-based scrolling,
 * search functionality,
 * pleasent color themes,
@@ -51,10 +51,12 @@ format. If you `echo` or `cat` lines that look like this:
   16 |       17 |       18 |       19 |       20
   21 |       22 |       23 |       24 |       25
   26 |       27 |       28 |       29 |       30
+(eof)
 ```
 
 and pipe them into `pspg` (as, say, `cat myfile.txt | path/to/pspg -s17 --force-uniborder`) you'll get a
-nicely formatted, vertically and horizontally scrollable, tabular display.
+nicely formatted, vertically and horizontally scrollable, tabular display. Hit `q` or `F10` and you're back
+to the usual command line (superficially, `pspg` works more or less the same as `more` and `less`).
 
 **[Dominic Tarr's pager module for NodeJS](https://github.com/dominictarr/default-pager)**—Yadda yadda yadda
 yadda yadda yadda yadda yadda yadda yadda yadda.
