@@ -79,11 +79,12 @@ path_to_pspg              = abspath '../pspg'
 #-----------------------------------------------------------------------------------------------------------
 @$page_output = ( settings, handler ) ->
   switch arity = arguments.length
+    when 0 then null
     when 1
       if isa.function settings
         [ settings, handler, ] = [ null, settings, ]
     when 2 then null
-    else throw new Error "µ33981 expected 2 or 3 arguments, got #{arity}"
+    else throw new Error "µ33981 expected between 0 and 2 arguments, got #{arity}"
   validate.function handler   if handler?
   validate.object   settings  if settings?
   #.........................................................................................................
