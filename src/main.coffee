@@ -31,7 +31,6 @@ require                   './exception-handler'
 join_paths                = ( P... ) -> PATH.resolve PATH.join P...
 abspath                   = ( P... ) -> join_paths __dirname, P...
 { to_width, width_of, }   = require 'to-width'
-pull_stream_to_stream     = require 'pull-stream-to-stream'
 new_pager                 = require 'default-pager'
 path_to_pspg              = abspath '../pspg'
 
@@ -94,7 +93,7 @@ path_to_pspg              = abspath '../pspg'
   #.........................................................................................................
   settings    = if settings? then assign {}, defaults, settings else defaults
   source      = PS.new_push_source()
-  stream      = pull_stream_to_stream.source PS.pull source
+  stream      = PS.node_stream_from_source PS.pull source
   stream.pipe new_pager settings, handler
   last        = Symbol 'last'
   #.........................................................................................................
