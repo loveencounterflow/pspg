@@ -9,11 +9,11 @@ lime='\x1b[38;05;118m'
 orange='\x1b[38;05;208m'
 red='\x1b[38;05;124m'
 reset='\x1b[0m'
-function info    () { set +u;  printf "$grey""SQLITE INSTALLER ""$blue%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
-function help    () { set +u;  printf "$grey""SQLITE INSTALLER ""$lime%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
-function urge    () { set +u;  printf "$grey""SQLITE INSTALLER ""$orange%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
-function warn    () { set +u;  printf "$grey""SQLITE INSTALLER ""$red%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
-function whisper () { set +u;  printf "$grey""SQLITE INSTALLER ""$grey%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
+function info    () { set +u;  printf "$grey""PSPG INSTALLER ""$blue%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
+function help    () { set +u;  printf "$grey""PSPG INSTALLER ""$lime%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
+function urge    () { set +u;  printf "$grey""PSPG INSTALLER ""$orange%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
+function warn    () { set +u;  printf "$grey""PSPG INSTALLER ""$red%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
+function whisper () { set +u;  printf "$grey""PSPG INSTALLER ""$grey%s$reset\n" "$1 $2 $3 $4 $5 $6"; set -u; }
 
 #-----------------------------------------------------------------------------------------------------------
 # if [ -z "${1+x}" ]; then
@@ -46,7 +46,7 @@ function procure_package {
 
 #-----------------------------------------------------------------------------------------------------------
 function build_pspg_binary {
-  help "building sqlite-for-mingkwai-ime"
+  help "building pspg binary"
   cd "$pspgbin_path"; whisper "cd $(pwd)"
   ./configure
   make
