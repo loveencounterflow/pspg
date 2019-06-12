@@ -33,6 +33,8 @@ abspath                   = ( P... ) -> join_paths __dirname, P...
 { to_width, width_of, }   = require 'to-width'
 new_pager                 = require 'default-pager'
 path_to_pspg              = abspath '../pspg'
+{ jr, }                   = CND
+
 
 #-----------------------------------------------------------------------------------------------------------
 @walk_table_rows = ( rows, keys, widths ) ->
@@ -46,10 +48,11 @@ path_to_pspg              = abspath '../pspg'
 
 #-----------------------------------------------------------------------------------------------------------
 @$collect_etc = ->
-  last      = Symbol 'last'
-  rows      = []
-  widths    = {}
-  keys      = new Set()
+  last        = Symbol 'last'
+  rows        = []
+  widths      = {}
+  keys        = new Set()
+  key_widths  = {}
   #.........................................................................................................
   return PS.$ { last, }, ( row, send ) =>
     if row is last
@@ -60,8 +63,8 @@ path_to_pspg              = abspath '../pspg'
       for key of row
         keys.add key
         d[ key ]      = value = row[ key ]?.toString() ? ''
-        width         = width_of value
-        widths[ key ] = Math.max 2, ( widths[ key ] ? 2 ), width
+        key_width     = ( key_widths[ key ] ?= width_of key )
+        widths[ key ] = Math.max 2, ( widths[ key ] ? 2 ), ( width_of value ), key_width
       rows.push d
     return null
 
