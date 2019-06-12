@@ -32,10 +32,10 @@
   },
   "homepage": "https://github.com/loveencounterflow/pspg#readme",
   "dependencies": {
-    "cnd": "^4.5.0",
+    "cnd": "^4.6.0",
     "default-pager": "^1.1.0",
-    "intertype": "^2.2.1",
-    "pipestreams": "^7.7.1",
+    "intertype": "^2.5.0",
+    "pipestreams": "^7.10.0",
     "to-width": "^1.0.3"
   }
 }
