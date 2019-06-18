@@ -56,7 +56,7 @@ jr                        = JSON.stringify
 #-----------------------------------------------------------------------------------------------------------
 @demo_many_rows = ->
   return new Promise ( resolve ) =>
-    source    = PS.new_value_source @get_random_words 1e3
+    source    = PS.new_value_source @get_random_words 800
     pipeline  = []
     pipeline.push source
     pipeline.push $ ( word, send ) -> send "#{word} ".repeat CND.random_integer 1, 20
@@ -176,9 +176,6 @@ jr                        = JSON.stringify
   words = ( word.replace /'s$/g, '' for word in words )
   words = ( word for word in words when word isnt '' )
   return words
-  # return $ ( fields, send ) =>
-  #   fields.bs = ( words[ CND.random_integer 0, count ] for _ in [ 0 .. n ] ).join ' '
-  #   send fields
 
 #-----------------------------------------------------------------------------------------------------------
 @$as_line = -> $ ( d, send ) =>
