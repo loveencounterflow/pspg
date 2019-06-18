@@ -47,6 +47,16 @@ path_to_pspg              = abspath '../pspg'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@to_text = ( value ) ->
+  return switch type = type_of value
+    when 'text'       then R = jr value; R = R[ 1 ... R.length - 1 ]; R.replace /\\"/g, '"'
+    when 'buffer'     then value.toString 'hex'
+    when 'number'     then "#{value}"
+    when 'null'       then '∎'
+    when 'undefined'  then '?'
+    else value?.toString() ? ''
+
+#-----------------------------------------------------------------------------------------------------------
 @$collect_etc = ->
   last        = Symbol 'last'
   rows        = []
@@ -62,7 +72,7 @@ path_to_pspg              = abspath '../pspg'
       d = {}
       for key of row
         keys.add key
-        d[ key ]      = value = row[ key ]?.toString() ? ''
+        d[ key ]      = value = @to_text row[ key ]
         key_width     = ( key_widths[ key ] ?= width_of key )
         widths[ key ] = Math.max 2, ( widths[ key ] ? 2 ), ( width_of value ), key_width
       rows.push d
