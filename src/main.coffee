@@ -37,12 +37,18 @@ path_to_pspg              = abspath '../pspg'
 
 
 #-----------------------------------------------------------------------------------------------------------
-@walk_table_rows = ( rows, keys, widths ) ->
-  yield ' ' + (  ( ( to_width key, widths[ key ] ) for key in keys ).join ' | ' ) + ' '
-  yield '-' + (  ( ( to_width '', widths[ key ], { padder: '-', } ) for key in keys ).join '-+-' ) + '-'
-  for row in rows
-    yield ' ' + (  ( ( to_width ( row[ key ] ? '' ), widths[ key ] ) for key in keys ).join ' | ' ) + ' '
-  yield "(#{rows.length} rows)"
+@walk_table_header = ( keys, widths ) ->
+  yield ' ' + (  ( ( to_width key, widths[ key ] ) for key from keys.values() ).join ' | ' ) + ' '
+  yield '-' + (  ( ( to_width '', widths[ key ], { padder: '-', } ) for key from keys.values() ).join '-+-' ) + '-'
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@walk_formatted_table_row = ( row, keys, widths ) ->
+  yield ' ' + (  ( ( to_width ( row[ key ] ? '' ), widths[ key ] ) for key from keys.values() ).join ' | ' ) + ' '
+
+#-----------------------------------------------------------------------------------------------------------
+@walk_table_footer = ( count ) ->
+  yield "(#{count} rows)"
   yield '\n\n'
   return null
 
@@ -57,25 +63,47 @@ path_to_pspg              = abspath '../pspg'
     else value?.toString() ? ''
 
 #-----------------------------------------------------------------------------------------------------------
-@$collect_etc = ->
+@$collect_etc = ( limit = 1000 ) ->
+  validate.positive limit
   last        = Symbol 'last'
-  rows        = []
+  cache       = []
   widths      = {}
   keys        = new Set()
   key_widths  = {}
+  count       = 0
+  send        = null
   #.........................................................................................................
-  return PS.$ { last, }, ( row, send ) =>
+  flush = =>
+    return null unless cache?
+    send line for line from @walk_table_header keys, widths
+    for cached_row in cache
+      send line for line from @walk_formatted_table_row cached_row, keys, widths
+    cache = null
+  #.........................................................................................................
+  return PS.$ { last, }, ( row, send_ ) =>
+    send = send_
+    #.......................................................................................................
     if row is last
-      # console.table rows
-      send line for line from @walk_table_rows rows, [ keys..., ], widths
-    else
-      d = {}
-      for key of row
-        keys.add key
-        d[ key ]      = value = @to_text row[ key ]
-        key_width     = ( key_widths[ key ] ?= width_of key )
-        widths[ key ] = Math.max 2, ( widths[ key ] ? 2 ), ( width_of value ), key_width
-      rows.push d
+      flush()
+      send line for line from @walk_table_footer count
+      return null
+    #.......................................................................................................
+    count++
+    #.......................................................................................................
+    if count > limit
+      flush()
+      row[ key ] = @to_text row[ key ] for key from keys.values()
+      send line for line from @walk_formatted_table_row row, keys, widths
+      return null
+    #.......................................................................................................
+    d = {}
+    for key of row
+      keys.add key
+      d[ key ]      = value = @to_text row[ key ]
+      key_width     = ( key_widths[ key ] ?= width_of key )
+      widths[ key ] = Math.max 2, ( widths[ key ] ? 2 ), ( width_of value ), key_width
+    cache.push d
+    #.......................................................................................................
     return null
 
 #-----------------------------------------------------------------------------------------------------------
