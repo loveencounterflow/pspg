@@ -54,6 +54,18 @@ jr                        = JSON.stringify
     PS.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
+@demo_many_rows = ->
+  return new Promise ( resolve ) =>
+    source    = PS.new_value_source @get_random_words 1e3
+    pipeline  = []
+    pipeline.push source
+    pipeline.push $ ( word, send ) -> send "#{word} ".repeat CND.random_integer 1, 20
+    pipeline.push $ ( text, send ) -> send { text, }
+    pipeline.push PSPG.$tee_as_table -> resolve()
+    pipeline.push PS.$drain()
+    PS.pull pipeline...
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_tabular_output_with_different_shapes = ->
   ### This is to demonstrate that when objects with different shapes—i.e. different sets of properties—are
   tabulated, the columns displayed represent the union of all keys of all objects. ###
@@ -157,6 +169,18 @@ jr                        = JSON.stringify
     send fields
 
 #-----------------------------------------------------------------------------------------------------------
+@get_random_words = ( n = 10 ) ->
+  validate.count n
+  CP    = require 'child_process'
+  words = ( ( CP.execSync "shuf -n #{n} /usr/share/dict/words" ).toString 'utf-8' ).split '\n'
+  words = ( word.replace /'s$/g, '' for word in words )
+  words = ( word for word in words when word isnt '' )
+  return words
+  # return $ ( fields, send ) =>
+  #   fields.bs = ( words[ CND.random_integer 0, count ] for _ in [ 0 .. n ] ).join ' '
+  #   send fields
+
+#-----------------------------------------------------------------------------------------------------------
 @$as_line = -> $ ( d, send ) =>
     d  = jr d unless isa.text d
     d += '\n' unless isa.line d
@@ -166,6 +190,7 @@ jr                        = JSON.stringify
 ############################################################################################################
 unless module.parent?
   do =>
+    await @demo_many_rows()
     await @demo_tabular_output()
     await @demo_tabular_output_with_different_shapes()
     await @demo_paged_output()
