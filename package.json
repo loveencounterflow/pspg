@@ -35,7 +35,7 @@
     "cnd": "^4.6.0",
     "default-pager": "^1.1.0",
     "intertype": "^2.5.0",
-    "pipestreams": "^7.13.3",
+    "pipestreams": "^8.0.0",
     "to-width": "^1.0.3"
   }
 }
