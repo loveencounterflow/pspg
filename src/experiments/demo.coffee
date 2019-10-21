@@ -19,7 +19,7 @@ PATH                      = require 'path'
 PS                        = require 'pipestreams'
 { $
   $async
-  select }                = PS
+  select }                = PS.export()
 types                     = require '../types'
 { isa
   validate
