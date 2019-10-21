@@ -34,7 +34,7 @@ abspath                   = ( P... ) -> join_paths __dirname, P...
 new_pager                 = require 'default-pager'
 path_to_pspg              = abspath '../pspg'
 { jr, }                   = CND
-
+assign                    = Object.assign
 
 #-----------------------------------------------------------------------------------------------------------
 @walk_table_header = ( keys, widths ) ->
@@ -133,6 +133,9 @@ path_to_pspg              = abspath '../pspg'
     args:   [  '-s17', '--force-uniborder', ]
   #.........................................................................................................
   settings    = if settings? then assign {}, defaults, settings else defaults
+  if settings.csv ### ??? ###
+    settings.args = [ settings.args..., '--csv', '--csv-border', '2', '--csv-double-header', ]
+  #.........................................................................................................
   source      = PS.new_push_source()
   stream      = PS.node_stream_from_source PS.pull source
   stream.pipe new_pager settings, handler

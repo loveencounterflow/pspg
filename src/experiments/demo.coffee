@@ -102,6 +102,41 @@ jr                        = JSON.stringify
     PS.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
+@demo_csv_output = ->
+  return new Promise ( resolve ) =>
+    source    = PS.read_from_file path_1
+    pipeline  = []
+    pipeline.push source
+    pipeline.push PS.$split_tsv()
+    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push @$add_random_words 10
+    pipeline.push @$add_ncrs()
+    pipeline.push @$add_numbers()
+    pipeline.push @$reorder_fields()
+    pipeline.push @$add_csv_header()
+    pipeline.push @$as_csv_line()
+    # pipeline.push PS.$watch ( d ) -> urge '^77766^', jr d
+    pipeline.push PSPG.$page_output { csv: true, }, -> resolve()
+    pipeline.push PS.$drain()
+    PS.pull pipeline...
+
+#-----------------------------------------------------------------------------------------------------------
+@demo_key_value = ->
+  return new Promise ( resolve ) =>
+    source    = PS.read_from_file path_1
+    pipeline  = []
+    pipeline.push source
+    pipeline.push PS.$split_tsv()
+    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push $ ( d, send ) -> send { key: d.glyph, value: d.formula, }
+    pipeline.push @$add_csv_header()
+    pipeline.push @$as_csv_line()
+    # pipeline.push PS.$watch ( d ) -> urge '^77766^', jr d
+    pipeline.push PSPG.$page_output { csv: true, }, -> resolve()
+    pipeline.push PS.$drain()
+    PS.pull pipeline...
+
+#-----------------------------------------------------------------------------------------------------------
 @$reorder_fields = -> $ ( row, send ) =>
   { nr
     fncr
@@ -179,17 +214,40 @@ jr                        = JSON.stringify
 
 #-----------------------------------------------------------------------------------------------------------
 @$as_line = -> $ ( d, send ) =>
-    d  = jr d unless isa.text d
-    d += '\n' unless isa.line d
-    send d
+  d  = jr d unless isa.text d
+  d += '\n' unless isa.line d
+  send d
+
+#-----------------------------------------------------------------------------------------------------------
+as_csv = ( x ) ->
+  x = x.toString() unless isa.text x
+  return '"' + ( x.replace /"/g, '""' ) + '"'
+
+#-----------------------------------------------------------------------------------------------------------
+@$add_csv_header = ->
+  is_first = true
+  return $ ( d, send ) =>
+    if is_first
+      is_first = false
+      send ( ( ( as_csv k ) for k, _ of d ).join ',' ) + '\n'
+    else
+      send d
+    return null
+
+#-----------------------------------------------------------------------------------------------------------
+@$as_csv_line = -> $ ( d, send ) =>
+  return send d if isa.text d
+  send ( ( ( as_csv v ) for _, v of d ).join ',' ) + '\n'
 
 
 ############################################################################################################
 unless module.parent?
   do =>
-    await @demo_many_rows()
+    # await @demo_many_rows()
     await @demo_tabular_output()
-    await @demo_tabular_output_with_different_shapes()
-    await @demo_paged_output()
+    # await @demo_tabular_output_with_different_shapes()
+    # await @demo_paged_output()
+    await @demo_csv_output()
+    await @demo_key_value()
 
 
