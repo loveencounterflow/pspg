@@ -1,0 +1,23 @@
+ToDo
+====
+
+Known bugs
+==========
+
+Possible ToDo
+=============
+* custom colour schemas
+* hide outer border
+* hide inner borders
+* draw scrollbars FoxPro style
+* row select, column select, export to file, copy to clipboard
+* mouse support for range select
+* support fetched data - columns width can be different
+
+Similar projects
+================
+* tless
+* ngrid
+* muhmud/lessql
+* visidata
+* tabview
