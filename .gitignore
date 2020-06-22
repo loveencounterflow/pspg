@@ -56,3 +56,7 @@ pspg
 /config.log
 /config.status
 /config.make
+
+
+node_modules
+pspg-binary
