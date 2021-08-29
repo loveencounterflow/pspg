@@ -16,10 +16,10 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 # FS                        = require 'fs'
 PATH                      = require 'path'
-PS                        = require 'pipestreams'
+SP                        = require 'steampipes'
 { $
   $async
-  select }                = PS
+  select }                = SP.export()
 types                     = require './types'
 { isa
   validate
@@ -32,7 +32,8 @@ join_paths                = ( P... ) -> PATH.resolve PATH.join P...
 abspath                   = ( P... ) -> join_paths __dirname, P...
 { to_width, width_of, }   = require 'to-width'
 new_pager                 = require 'default-pager'
-path_to_pspg              = abspath '../pspg'
+# path_to_pspg              = abspath '../pspg'
+path_to_pspg              = 'pspg'
 { jr, }                   = CND
 assign                    = Object.assign
 
@@ -80,7 +81,7 @@ assign                    = Object.assign
       send line for line from @walk_formatted_table_row cached_row, keys, widths
     cache = null
   #.........................................................................................................
-  return PS.$ { last, }, ( row, send_ ) =>
+  return SP.$ { last, }, ( row, send_ ) =>
     send = send_
     #.......................................................................................................
     if row is last
@@ -112,9 +113,9 @@ assign                    = Object.assign
   pipeline = []
   pipeline.push @$collect_etc()
   pipeline.push @$page_output arguments...
-  pipeline.push PS.$drain()
+  pipeline.push SP.$drain()
   #.........................................................................................................
-  return PS.$tee PS.pull pipeline...
+  return SP.$tee SP.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
 @$page_output = ( settings, handler ) ->
@@ -136,16 +137,17 @@ assign                    = Object.assign
   if settings.csv ### ??? ###
     settings.args = [ settings.args..., '--csv', '--csv-border', '2', '--csv-double-header', ]
   #.........................................................................................................
-  source      = PS.new_push_source()
-  stream      = PS.node_stream_from_source PS.pull source
+  source      = SP.new_push_source()
+  stream      = process.stdout # SP.node_stream_from_source SP.pull source, SP.$watch ( d ) -> info '^33344^', d
   stream.pipe new_pager settings, handler
   last        = Symbol 'last'
   #.........................................................................................................
-  return PS.$watch { last, }, ( line ) ->
+  return SP.$watch { last, }, ( line ) ->
     return source.end() if line is last
     line  = '' unless line?
     line  = line.toString() unless isa.text line
     line += '\n'            unless isa.line line
-    source.send line
+    # source.send line
+    source.write line
     return null
 

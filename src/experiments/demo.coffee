@@ -16,10 +16,10 @@ echo                      = CND.echo.bind CND
 #...........................................................................................................
 # FS                        = require 'fs'
 PATH                      = require 'path'
-PS                        = require 'pipestreams'
+SP                        = require 'steampipes'
 { $
   $async
-  select }                = PS.export()
+  select }                = SP.export()
 types                     = require '../types'
 { isa
   validate
@@ -37,104 +37,112 @@ jr                        = JSON.stringify
 
 
 #-----------------------------------------------------------------------------------------------------------
+$split_tsv = ( names... ) ->
+  validate.list_of 'nonempty_text', names
+  pipeline = []
+  pipeline.push SP.$split()
+  pipeline.push $ ( line, send ) -> send line.split '\t'
+  pipeline.push $ ( fields, send ) ->
+    d = {}
+    for field, idx in fields
+      d[ names[ idx ] ? "field#{idx + 1}" ] = field
+    send d
+  return SP.pull pipeline...
+
+#-----------------------------------------------------------------------------------------------------------
 @demo_tabular_output = ->
   return new Promise ( resolve ) =>
-    source    = PS.read_from_file path_1
+    source    = SP.read_from_file path_1
     pipeline  = []
     pipeline.push source
-    pipeline.push PS.$split_tsv()
-    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push $split_tsv 'fncr', 'glyph', 'formula'
     pipeline.push @$add_random_words 10
     pipeline.push @$add_ncrs()
     pipeline.push @$add_numbers()
     pipeline.push @$add_nulls()
     pipeline.push @$reorder_fields()
     pipeline.push PSPG.$tee_as_table -> resolve()
-    pipeline.push PS.$drain()
-    PS.pull pipeline...
+    pipeline.push SP.$drain()
+    SP.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_many_rows = ->
   return new Promise ( resolve ) =>
-    source    = PS.new_value_source @get_random_words 800
+    source    = SP.new_value_source @get_random_words 800
     pipeline  = []
     pipeline.push source
     pipeline.push $ ( word, send ) -> send "#{word} ".repeat CND.random_integer 1, 20
     pipeline.push $ ( text, send ) -> send { text, }
     pipeline.push PSPG.$tee_as_table -> resolve()
-    pipeline.push PS.$drain()
-    PS.pull pipeline...
+    pipeline.push SP.$drain()
+    SP.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_tabular_output_with_different_shapes = ->
   ### This is to demonstrate that when objects with different shapes—i.e. different sets of properties—are
   tabulated, the columns displayed represent the union of all keys of all objects. ###
   return new Promise ( resolve ) =>
-    source    = PS.read_from_file path_1
+    source    = SP.read_from_file path_1
     pipeline  = []
     pipeline.push source
-    pipeline.push PS.$split_tsv()
-    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push $split_tsv 'fncr', 'glyph', 'formula'
     pipeline.push @$add_random_words 10
     pipeline.push @$add_ncrs()
     pipeline.push @$add_numbers()
     pipeline.push @$reorder_fields()
     pipeline.push @$drop_keys()
     pipeline.push PSPG.$tee_as_table -> resolve()
-    pipeline.push PS.$drain()
-    PS.pull pipeline...
+    pipeline.push SP.$drain()
+    SP.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_paged_output = ->
   return new Promise ( resolve ) =>
-    source    = PS.read_from_file path_1
+    source    = SP.read_from_file path_1
     pipeline  = []
     pipeline.push source
-    pipeline.push PS.$split_tsv()
-    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push $split_tsv 'fncr', 'glyph', 'formula'
     pipeline.push @$add_random_words 10
     pipeline.push @$add_ncrs()
     pipeline.push @$add_numbers()
     pipeline.push @$reorder_fields()
     pipeline.push @$as_line()
     pipeline.push PSPG.$page_output -> resolve()
-    pipeline.push PS.$drain()
-    PS.pull pipeline...
+    pipeline.push SP.$drain()
+    SP.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_csv_output = ->
   return new Promise ( resolve ) =>
-    source    = PS.read_from_file path_1
+    source    = SP.read_from_file path_1
     pipeline  = []
     pipeline.push source
-    pipeline.push PS.$split_tsv()
-    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push $split_tsv 'fncr', 'glyph', 'formula'
     pipeline.push @$add_random_words 10
     pipeline.push @$add_ncrs()
     pipeline.push @$add_numbers()
     pipeline.push @$reorder_fields()
     pipeline.push @$add_csv_header()
     pipeline.push @$as_csv_line()
-    # pipeline.push PS.$watch ( d ) -> urge '^77766^', jr d
+    # pipeline.push SP.$watch ( d ) -> urge '^77766^', jr d
     pipeline.push PSPG.$page_output { csv: true, }, -> resolve()
-    pipeline.push PS.$drain()
-    PS.pull pipeline...
+    pipeline.push SP.$drain()
+    SP.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
 @demo_key_value = ->
   return new Promise ( resolve ) =>
-    source    = PS.read_from_file path_1
+    source    = SP.read_from_file path_1
     pipeline  = []
     pipeline.push source
-    pipeline.push PS.$split_tsv()
-    pipeline.push PS.$name_fields 'fncr', 'glyph', 'formula'
+    pipeline.push $split_tsv 'fncr', 'glyph', 'formula'
     pipeline.push $ ( d, send ) -> send { key: d.glyph, value: d.formula, }
     pipeline.push @$add_csv_header()
     pipeline.push @$as_csv_line()
-    # pipeline.push PS.$watch ( d ) -> urge '^77766^', jr d
+    # pipeline.push SP.$watch ( d ) -> urge '^77766^', jr d
     pipeline.push PSPG.$page_output { csv: true, }, -> resolve()
-    pipeline.push PS.$drain()
-    PS.pull pipeline...
+    pipeline.push SP.$drain()
+    SP.pull pipeline...
 
 #-----------------------------------------------------------------------------------------------------------
 @$reorder_fields = -> $ ( row, send ) =>
