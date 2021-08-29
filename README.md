@@ -1,5 +1,19 @@
 
 
+
+
+
+# Archived; Replacement
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+db_path=$1
+query=$2
+path_to_pspg=pspg
+sqlite3 -csv -header "$db_path" "$query" | "$path_to_pspg" -s6 --csv --csv-header=on --double-header
+```
+
 # pspg
 
 A NodeJS command line pager for tabular content which respects wide characters (important for mixed
